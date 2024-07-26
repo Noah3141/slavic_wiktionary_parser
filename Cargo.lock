@@ -1926,6 +1926,7 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
+ "wiktionary_parser",
 ]
 
 [[package]]
@@ -2705,6 +2706,15 @@ checksum = "a44ab49fad634e88f55bf8f9bb3abd2f27d7204172a112c7c9987e01c1c94ea9"
 dependencies = [
  "redox_syscall 0.4.1",
  "wasite",
+]
+
+[[package]]
+name = "wiktionary_parser"
+version = "0.1.0"
+dependencies = [
+ "reqwest",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

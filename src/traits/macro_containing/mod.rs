@@ -7,27 +7,34 @@ pub trait MacroContaining {
 }
 
 impl MacroContaining for String {
+    /// Finds macros in a String
     fn find_macros(&self) -> Vec<String> {
         let mut macros = Vec::new();
         let mut stack = Vec::new();
-        let mut macro_start = None;
-        let mut chars = self.chars().enumerate().peekable();
+        let mut macro_start: Option<usize> = None;
+        let mut chars = self.chars().enumerate();
 
-        while let Some((i, c)) = chars.next() {
-            if c == '{' {
-                stack.push(i);
-                if stack.len() == 2 {
-                    macro_start = Some(i - 1);
-                }
-            } else if c == '}' {
-                stack.pop();
-                if stack.len() == 1 && macro_start.is_some() {
-                    let start = macro_start.unwrap();
-                    let end = i + 2;
-                    let macro_string = self.chars().skip(start).take(end - start).collect::<String>();
-                    macros.push(macro_string);
-                    macro_start = None;
-                }
+        while let Some((index, c)) = chars.next() {
+            match c {
+                '{' => {
+                    stack.push(index);
+                    if stack.len() == 2 {
+                        macro_start = Some(index - 1);
+                    }
+                },
+                '}' => {
+                    stack.pop();
+                    if stack.len() == 1 && macro_start.is_some() {
+                        let start = macro_start.unwrap();
+                        let end = index + 2;
+                        let macro_string = self.chars().skip(start).take(end - start).collect::<String>();
+                        if macro_string.starts_with("{{") && macro_string.ends_with("}}") {
+                            macros.push(macro_string);
+                        }
+                        macro_start = None;
+                    }
+                },
+                _ => (),
             }
         }
 

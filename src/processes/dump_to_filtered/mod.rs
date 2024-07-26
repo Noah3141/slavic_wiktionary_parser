@@ -1,5 +1,5 @@
-use std::{fs::File, io::{BufReader, BufWriter, Read, Seek, Write}, os::windows::fs::FileExt};
-use crate::{traits::Seekable, utils::redact_comment_block::redact_comment_block};
+use std::{fs::File, io::{BufReader, BufWriter, Read, Write}};
+use crate::{constants::DELIMITER, traits::Seekable, utils::redact_comment_block::redact_comment_block};
 
 const PAGE_START_TAG: &[u8; 6] = b"<page>";
 const PAGE_END_TAG: &[u8; 7] = b"</page>";
@@ -66,7 +66,7 @@ pub fn dump_to_filtered(dump: &str, out: &str, search_headers: &[&str]) -> Resul
                     redact_comment_block(&mut page_content);
     
                     out_buffer
-                        .write(b"===================================================\n")
+                        .write(DELIMITER.as_bytes())
                         .expect("File write");
                     out_buffer.write(page_content).expect("File write");
                     out_buffer.write(b"\n").expect("File write");
