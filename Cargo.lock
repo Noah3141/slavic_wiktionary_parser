@@ -410,9 +410,11 @@ dependencies = [
 name = "db"
 version = "0.1.0"
 dependencies = [
+ "scraper",
  "sea-orm",
  "serde",
  "serde_json",
+ "wiktionary_parser",
 ]
 
 [[package]]
@@ -3125,7 +3127,6 @@ dependencies = [
 name = "wiktionary_parser"
 version = "0.1.0"
 dependencies = [
- "db",
  "html-escape",
  "regex",
  "reqwest",

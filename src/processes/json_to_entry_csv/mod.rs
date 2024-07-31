@@ -1,11 +1,12 @@
 use std::{fs::File, io::{BufReader, Write}};
 
-use rubit_api_db::dictionary_info;
-use serde_json::json;
 use wiktionary_parser::models::{
     language::Language, 
-    wiktionary_macro::{russian, Expand, WiktionaryMacro
-}};
+    wiktionary_macro::{
+        Expand, 
+        WiktionaryMacro
+    }
+};
 
 
 
@@ -15,7 +16,7 @@ pub async fn json_to_entry_csv(
     out: &str, 
     overwrite: bool,
     language: Language,
-) {
+) -> Result<(), ()> {
     println!("Reading file...");
     let reader = BufReader::with_capacity(
         1024*1024*250, 
@@ -26,76 +27,123 @@ pub async fn json_to_entry_csv(
 
     let mut out_file =  match overwrite {
         true =>  File::options()
-            .append(true)
-            .create(true)
+            .write(true)
             .truncate(true)
+            .create(true)
             .open(out)
             .expect("creation of out file with overwrite"),
         false => File::options()
-            .append(true)
+            .write(true)
             .create_new(true)
             .truncate(false)
             .open(out)
             .expect("creation of out file without overwriting")
     };
 
+    out_file.write(format!("id, lemma, commonality, type, dictionary_info\n").as_bytes() ).expect("writing of bytes");
+
     let client = reqwest::Client::new();
     
     match language {
         Language::Russian => {
             use wiktionary_parser::models::wiktionary_macro::russian;
+            use rubit_api_db::dictionary_info::russian::*;
             use wiktionary_parser::models::wiktionary_macro::russian::{
                 RuConj,  ru_conj,
                 RuDeclAdj,  ru_decl_adj,
                 RuNounTable, ru_noun_table
             };
 
-            let ru_conjugations = wiki_macros.iter()
-            .filter_map(|m| match m { WiktionaryMacro::RuConj(n) => Some(n), _ => None })
-            .filter(|t| !t.is_old());
-            for ru_conj in ru_conjugations {
+            // let ru_conjugations = wiki_macros.iter()
+            //     .filter_map(|m| match m { WiktionaryMacro::RuConj(n) => Some(n), _ => None })
+            //     .filter(|t| !t.is_old());
+            
+            // for ru_conj in ru_conjugations {
+            //     let ipa_string = wiki_macros.iter()
+            //         .filter_map(|m| match m { WiktionaryMacro::RuIpa(n) => Some(n), _ => None})
+            //         .find(|ipa_m| { 
+            //                     ipa_m.page_id == ru_conj.page_id // This can be wrong due to complex pages, but should probably be over 80% accurate 95% of the time... 
+            //         })
+            //         .expect("ipa_string corresponding to ru_conj")
+            //         .to_ipa_string(&client)
+            //         .await;
+            //     let conjugation = ru_conj.html(&client).await;
+            //     let dictionary_info = serde_json::to_string(
+            //         &RussianVerb::build_from_ru_conj(&ru_conj, ipa_string, &conjugation)
+            //     ).expect("serialization of db dictionary_info model as json");
+                
+            //     out_file.write(
+            //         format!("{id}, {lemma}, {commonality}, {pos_type}, {dictionary_info}\n",
+            //                 id="NULL",
+            //                 lemma=ru_conj.lemma(),
+            //                 commonality="NULL",
+            //                 pos_type="Verb",
+            //                 dictionary_info=dictionary_info
+            //         ).as_bytes()
+            //     ).expect("writing of bytes");
+            // }
+    
+            // let ru_noun_declensions = wiki_macros.iter()
+            //     .filter_map(|m| match m { WiktionaryMacro::RuNounTable(n) => Some(n), _ => None })
+            //     .filter(|t| !t.is_old());
+            // for ru_noun_table in ru_noun_declensions {
+            //     let ipa_string = wiki_macros.iter()
+            //         .filter_map(|m| match m { WiktionaryMacro::RuIpa(n) => Some(n), _ => None})
+            //         .find(|ipa_m| { 
+            //                     ipa_m.page_id == ru_noun_table.page_id // This can be wrong due to complex pages, but should probably be over 80% accurate 95% of the time... 
+            //         })
+            //         .expect("ipa_string corresponding to ru_noun_table")
+            //         .to_ipa_string(&client)
+            //         .await;
+            //     let declension = ru_noun_table.html(&client).await;
+            //     let dictionary_info = serde_json::to_string(
+            //         &RussianNoun::build_from_ru_noun_table(&ru_noun_table, ipa_string, &declension)
+            //     ).expect("serialization of db dictionary_info model as json");
+                
+            //     out_file.write(
+            //         format!("{id}, {lemma}, {commonality}, {pos_type}, {dictionary_info}\n",
+            //                 id="NULL",
+            //                 lemma=ru_noun_table.lemma(),
+            //                 commonality="NULL",
+            //                 pos_type="Noun",
+            //                 dictionary_info=dictionary_info
+            //         ).as_bytes()
+            //     ).expect("writing of bytes");
+            // }
+        
+            let ru_adj_declensions = wiki_macros.iter()
+                .filter_map(|m| match m { WiktionaryMacro::RuDeclAdj(n) => Some(n), _ => None })
+                .filter(|t| !t.is_old());
 
+            for ru_adj_decl in ru_adj_declensions {
                 let ipa_string = wiki_macros.iter()
                     .filter_map(|m| match m { WiktionaryMacro::RuIpa(n) => Some(n), _ => None})
                     .find(|ipa_m| { 
-                                ipa_m.page_id == ru_conj.page_id // This can be wrong due to complex pages, but should probably be over 80% accurate 95% of the time... 
+                                ipa_m.page_id == ru_adj_decl.page_id // This can be wrong due to complex pages, but should probably be over 80% accurate 95% of the time... 
                     })
-                    .expect("ipa_string corresponding to ru_conj")
+                    .expect("ipa_string corresponding to ru_adj_Decl")
                     .to_ipa_string(&client)
                     .await;
-
-                let conjugation = ru_conj.html(&client).await;
+                let declension = ru_adj_decl.html(&client).await;
+                let dictionary_info = serde_json::to_string(
+                    &RussianAdjective::build_from_ru_decl_adj(&ru_adj_decl, ipa_string, &declension)
+                ).expect("serialization of db dictionary_info model as json");
                 
                 out_file.write(
-                    format!("{id}, {lemma}, {commonality}, {pos_type}, {dictionary_info}",
+                    format!("{id}, {lemma}, {commonality}, {pos_type}, {dictionary_info}\n",
                             id="NULL",
-                            lemma=ru_conj.lemma(),
+                            lemma=ru_adj_decl.lemma(),
                             commonality="NULL",
-                            pos_type="Verb",
-                            dictionary_info=json!({
-                                "dictionary_form": ru_conj.lemma(),
-                                "ipa": ipa_string,
-                                "is_imperfective": RuConj::is_imperfective(&conjugation),
-                                // "я_form": RuConj::get_form(&conjugation, ru_conj::class_selectors:: )
-                            })
-                        ).as_bytes()
+                            pos_type="Adjective",
+                            dictionary_info=dictionary_info
+                    ).as_bytes()
                 ).expect("writing of bytes");
             }
-    
-            let ru_noun_declensions = wiki_macros.iter()
-                .filter_map(|m| match m { WiktionaryMacro::RuNounTable(n) => Some(n), _ => None })
-                .filter(|t| !t.is_old());
-            for ru_noun_table in ru_noun_declensions {
-            }
-        
-            let ru_adj_declensions = wiki_macros.iter()
-                .filter_map(|m| match m { WiktionaryMacro::RuDeclAdj(n) => Some(n), _ => None });
-            for ru_adj_decl in ru_adj_declensions {
-            }
 
+
+            Ok(())
         },
         Language::Ukrainian => todo!(),
         Language::Belarusian => todo!(),
     }
-
 }
