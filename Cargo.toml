@@ -10,3 +10,5 @@ serde_json = "1.0.120"
 
 rubit_api_db = { path = "C:/Users/Noah3/Code/rubit_api/db", package = "db" }
 wiktionary_parser = { path = "C:/Users/Noah3/Code/wiktionary_parser"}
+tokio = { version = "1", features = ["full"] }
+tokio-macros = { version = "0.2.0-alpha.6" }

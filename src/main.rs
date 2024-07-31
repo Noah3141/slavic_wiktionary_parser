@@ -1,15 +1,14 @@
-use std::{fs::File, io::BufReader};
+use std::{fs::File, io::{BufReader, Write}};
 
-use wiktionary_parser::models::{language::Language, wiktionary_macro::{
-    russian::*, WiktionaryMacro 
-}};
+use wiktionary_parser::models::{language::Language, wiktionary_macro::*};
 
 mod processes;
 mod traits;
 mod utils;
 mod constants;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     
     // processes::dump_to_filtered(
     //     "C:/Users/Noah3/Code/slavic_wiktionary_parser/data/wiki_dumps/en_wiktionary.xml",
@@ -47,44 +46,47 @@ fn main() {
     // ).expect("success");
 
     println!("Reading file...");
-    let reader = BufReader::with_capacity(1024*1024*250, File::open("C:/Users/Noah3/Code/slavic_wiktionary_parser/data/parsed/belarusian.json").unwrap());
+    let reader = BufReader::with_capacity(
+        1024*1024*250, 
+        File::open("C:/Users/Noah3/Code/slavic_wiktionary_parser/data/parsed/russian.json").unwrap()
+    );
     let wiki_macros: Vec<WiktionaryMacro> = serde_json::from_reader(reader).unwrap();
     println!("Finished!");
 
-    let noun_count = wiki_macros.iter()
-        .filter_map(|m| match m {
-            WiktionaryMacro::BeNoun(m) => Some(m),
-            _ => None,
-        })
-        .count();
-    let verb_count: usize = wiki_macros.iter()
-        .filter_map(|m| match m {
-            WiktionaryMacro::BeVerb(m) => Some(m),
-            _ => None,
-        })
-        .count();
-    let adj_count: usize = wiki_macros.iter()
-        .filter_map(|m| match m {
-            WiktionaryMacro::BeAdj(m) => Some(m),
-            _ => None,
-        })
-        .count();
+    // for item in wiki_macros.into_iter().filter_map(|m| match m {
+    //     WiktionaryMacro::InflectionOf(m) => Some(m),
+    //     _ => None
+    // })
+    // .step_by(15)
+    // .take(150) {
+    //     println!("{:#?}", item.form_and_lemma())
+    // }
 
-    let inflected_count: usize = wiki_macros.iter()
-        .filter_map(|m| {match m {
-            WiktionaryMacro::InflectionOf(m) => Some(m),
-            _ => None,
-        }})
-        .filter(|infl| {infl.language == Language::Belarusian})
-        .count();
+    let client = reqwest::Client::new();
 
-    println!("--Belarusian--");
-    println!("Nouns: {noun_count}");
-    println!("Verbs: {verb_count}");
-    println!("Adjs: {adj_count}");
-    println!("Total: {}", noun_count + verb_count + adj_count );
-    println!("-------------");
+    let items = wiki_macros.into_iter()
+        .filter_map(|m| 
+            match m {
+                WiktionaryMacro::RuIpa(n) => Some(n),
+                // WiktionaryMacro::RuAdj(n) => Some(n),
+                // WiktionaryMacro::InflectionOf(m) => Some(m),
+                _ => None
+            }
+        )
+        .step_by(35)
+        .take(3);
 
-    println!("Inflected: {inflected_count}");
+    
+    for item in items {
+        println!("{} - {}", item.macro_text, item.page_title);
+        let mut writer = File::options().write(true).create(true).truncate(true).open(format!(
+            "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\examples\\ru-ipa_html\\{}.html", item.page_title
+        )).expect("writer file");
+
+        println!("{item:#?}");
+        let res = &item.expand_with(&client).await;
+        writer.write(&mut res.as_bytes()).expect("writing to file");
+    
+    }
 
 }
