@@ -1,4 +1,4 @@
-use std::{fmt::format, fs::File, io::{BufReader, Write}};
+use std::{fmt::format, fs::File, io::{BufReader, BufWriter, Write}};
 use wiktionary_parser::models::{language::Language, wiktionary_macro::{Expand, WiktionaryMacro}};
 
 
@@ -17,7 +17,7 @@ pub async fn json_to_form_lemma(
     let wiki_macros: Vec<WiktionaryMacro> = serde_json::from_reader(reader).unwrap();
     println!("Finished!");
 
-    let mut out_file =  match overwrite {
+    let out_file =  match overwrite {
         true =>  File::options()
             .append(true)
             .create(true)
@@ -25,47 +25,80 @@ pub async fn json_to_form_lemma(
             .open(out)
             .expect("creation of out file with overwrite"),
         false => File::options()
-            .append(true)
+            .write(true)
             .create_new(true)
-            .truncate(false)
             .open(out)
             .expect("creation of out file without overwriting")
     };
 
-    let client = reqwest::Client::new();
+    println!("\nBeginning Form Lemma process.");
+    let mut i:usize = 0;
+
+    let mut writer = BufWriter::with_capacity(1024 * 1024 * 1, out_file);
+    writer.write(format!("form, lemma\n").as_bytes()).expect("writing of bytes");
+    let client = reqwest::Client::builder()
+        .pool_idle_timeout(None)
+        .build()
+        .expect("Client build process");
 
     match language {
         Language::Russian => {
+            println!("Processing Russian...");
         
             let ru_conjugations = wiki_macros.iter()
                 .filter_map(|m| match m { WiktionaryMacro::RuConj(n) => Some(n), _ => None })
                 .filter(|t| !t.is_old());
             for ru_conj in ru_conjugations {
+                i += 1;
+                if i % 50 == 0 {
+                    println!("Processing: {}", &ru_conj.macro_text)
+                }
                 let tups = ru_conj.form_and_lemma(&client).await;
                 for tup in tups {
-                    out_file.write(format!("{}, {}", tup.0, tup.1).as_bytes()).expect("writing of bytes");
+                    writer.write(format!("{}, {}\n", tup.0, tup.1).as_bytes()).expect("writing of bytes");
                 }
             }
+
+            i = 0;
+            println!("Verbs complete.");
         
             let ru_noun_declensions = wiki_macros.iter()
                 .filter_map(|m| match m { WiktionaryMacro::RuNounTable(n) => Some(n), _ => None })
                 .filter(|t| !t.is_old());
             for ru_noun_table in ru_noun_declensions {
+                i+=1;
+                if i % 50 == 0 {
+                    println!("Processing: {}", &ru_noun_table.macro_text)
+                }
                 let tups = ru_noun_table.form_and_lemma(&client).await;
                 for tup in tups {
-                    out_file.write(format!("{}, {}", tup.0, tup.1).as_bytes()).expect("writing of bytes");
+                    writer.write(format!("{}, {}\n", tup.0, tup.1).as_bytes()).expect("writing of bytes");
                 }
             }
+
+            i = 0;
+            println!("Nouns complete.");
         
             let ru_adj_declensions = wiki_macros.iter()
                 .filter_map(|m| match m { WiktionaryMacro::RuDeclAdj(n) => Some(n), _ => None });
             for ru_adj_decl in ru_adj_declensions {
+                i+=1;
+                if i % 50 == 0 {
+                    println!("Processing: {}", &ru_adj_decl.macro_text)
+                }
                 let tups = ru_adj_decl.form_and_lemma(&client).await;
                 for tup in tups {
-                    out_file.write(format!("{}, {}", tup.0, tup.1).as_bytes()).expect("writing of bytes");
+                    writer.write(format!("{}, {}\n", tup.0, tup.1).as_bytes()).expect("writing of bytes");
                 }
             }
+
+            println!("Adjectives complete!");
+
+
+            writer.flush().expect("flush!");
         
+            println!("Form-lemma complete!");
+
             Ok(())
         },
         Language::Ukrainian => {
@@ -74,13 +107,21 @@ pub async fn json_to_form_lemma(
             for be_conj in be_conjugations {
                 let tups = be_conj.form_and_lemma(&client).await;
                 for tup in tups {
-                    out_file.write(format!("{}, {}", tup.0, tup.1).as_bytes()).expect("writing of bytes");
+                    writer.write(format!("{}, {}\n", tup.0, tup.1).as_bytes()).expect("writing of bytes");
                 }
             }
+
+
+
+            writer.flush().expect("flush!");
 
             todo!()
         },
         Language::Belarusian => {
+
+
+            writer.flush().expect("flush!");
+
             todo!()
         },
     }

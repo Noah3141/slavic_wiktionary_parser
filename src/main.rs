@@ -35,7 +35,7 @@ async fn main() {
     // ).expect("success");
     // processes::filtered_to_json(
     //     "C:/Users/Noah3/Code/slavic_wiktionary_parser/data/filtered_wiki_dump/russian.txt",
-    //     "C:/Users/Noah3/Code/slavic_wiktionary_parser/data/parsed/russian.json",
+    //     "C:/Users/Noah3/Code/slavic_wiktionary_parser/data/parsed/russian2.json",
     //     true,
     //     Language::Russian
     // ).expect("success");
@@ -46,14 +46,20 @@ async fn main() {
     //     Language::Ukrainian
     // ).expect("success");
 
-    // processes::json_to_entry_csv(
+    // processes::json_to_form_lemma(
     //     "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\parsed\\russian.json", 
-    //     "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\db_csvs\\russian.csv", 
-    //     true, 
+    //     "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\russian_complete\\form_lemma_verbs.csv", 
+    //     false, 
     //     Language::Russian,
-    // ).await.expect("process success")
+    // ).await.expect("json_to_form_lemma success");
 
-    explore().await
+    processes::json_to_entry_csv(
+        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\parsed\\russian.json", 
+        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\russian_complete\\entries.csv", 
+        Language::Russian,
+    ).await.expect("json_to_entry_csv success");
+
+    // explore()
 }
 
 
@@ -72,7 +78,7 @@ async fn explore() {
 
     let items = wiki_macros.into_iter()
         .filter_map(|m| match m {
-                WiktionaryMacro::RuDeclAdj(n) => {
+                WiktionaryMacro::RuNounTable(n) => {
                     if n.lemma().len() < 3 {
                         Some(n)
                     } else {
@@ -80,7 +86,8 @@ async fn explore() {
                     }
                 },
                 _ => None
-        });
+        })
+        .take(30);
         // .take(3);
 
     

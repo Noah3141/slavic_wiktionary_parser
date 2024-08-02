@@ -9,3 +9,5 @@ pub use json_to_form_lemma::json_to_form_lemma;
 
 pub mod json_to_entry_csv;
 pub use json_to_entry_csv::json_to_entry_csv;
+
+pub mod json_to_entry_json;
