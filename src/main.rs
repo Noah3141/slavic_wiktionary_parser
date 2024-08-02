@@ -54,9 +54,9 @@ async fn main() {
     // ).await.expect("json_to_form_lemma success");
 
     processes::json_to_entry_csv(
-        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\parsed\\russian.json", 
-        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\russian_complete\\entries.csv", 
-        Language::Russian,
+        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\parsed\\belarusian.json", 
+        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\belarusian_complete\\entries.csv", 
+        Language::Belarusian,
     ).await.expect("json_to_entry_csv success");
 
     // explore()
