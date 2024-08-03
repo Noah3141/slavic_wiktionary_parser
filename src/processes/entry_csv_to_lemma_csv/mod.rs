@@ -103,73 +103,73 @@ pub fn entry_csv_to_lemma_csv(
                 match part_of_speech {
                     "Verb" => {
                         let verb: rubit_api_db::dictionary_info::belarusian::BelarusianVerb = serde_json::from_str(dictionary_info).expect("success of deserialization");
-                        if let Some(form) = verb.я_form { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.ты_form { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.ён_form { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.мы_form { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.вы_form { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.яны_form { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.masc_past { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.fem_past { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.neut_past { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.plur_past { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.past_passive { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.past_adverbial { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.past_active { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.present_active { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.present_adverbial { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.singular_imperative { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.plural_imperative { writer.write(format!("{}, {}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.я_form { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.ты_form { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.ён_form { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.мы_form { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.вы_form { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.яны_form { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.masc_past { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.fem_past { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.neut_past { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.plur_past { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.past_passive { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.past_adverbial { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.past_active { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.present_active { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.present_adverbial { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.singular_imperative { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = verb.plural_imperative { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
                     },
                     "Noun" => {
                         let noun: rubit_api_db::dictionary_info::belarusian::BelarusianNoun = serde_json::from_str(dictionary_info).expect("success of deserialization");
-                        if let Some(form) = noun.nom_sing { writer.write(format!("{}, {}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = noun.nom_plur { writer.write(format!("{}, {}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = noun.acc_sing { writer.write(format!("{}, {}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = noun.acc_plur { writer.write(format!("{}, {}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = noun.gen_sing { writer.write(format!("{}, {}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = noun.gen_plur { writer.write(format!("{}, {}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = noun.ins_sing { writer.write(format!("{}, {}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = noun.ins_plur { writer.write(format!("{}, {}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = noun.loc_sing { writer.write(format!("{}, {}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = noun.loc_plur { writer.write(format!("{}, {}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = noun.nom_sing { writer.write(format!("{}|{}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = noun.nom_plur { writer.write(format!("{}|{}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = noun.acc_sing { writer.write(format!("{}|{}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = noun.acc_plur { writer.write(format!("{}|{}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = noun.gen_sing { writer.write(format!("{}|{}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = noun.gen_plur { writer.write(format!("{}|{}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = noun.ins_sing { writer.write(format!("{}|{}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = noun.ins_plur { writer.write(format!("{}|{}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = noun.loc_sing { writer.write(format!("{}|{}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = noun.loc_plur { writer.write(format!("{}|{}\n", form.unaccented(), noun.lemma).as_bytes()).expect("writing success"); };
                     },
                     "Adjective" => {
                         let adj: rubit_api_db::dictionary_info::belarusian::BelarusianAdjective = serde_json::from_str(dictionary_info).expect("success of deserialization");
-                        writer.write(format!("{}, {}\n", adj.nom_masc.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.nom_fem.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.nom_neut.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.nom_plur.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.nom_masc.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.nom_fem.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.nom_neut.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.nom_plur.unaccented(), adj.lemma).as_bytes()).expect("writing success");
 
-                        writer.write(format!("{}, {}\n", adj.acc_masc.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.acc_fem.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.acc_neut.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.acc_plur.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.acc_masc.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.acc_fem.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.acc_neut.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.acc_plur.unaccented(), adj.lemma).as_bytes()).expect("writing success");
 
-                        writer.write(format!("{}, {}\n", adj.gen_masc.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.gen_fem.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.gen_neut.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.gen_plur.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.gen_masc.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.gen_fem.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.gen_neut.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.gen_plur.unaccented(), adj.lemma).as_bytes()).expect("writing success");
 
-                        writer.write(format!("{}, {}\n", adj.ins_masc.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.ins_fem.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.ins_neut.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.ins_plur.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.ins_masc.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.ins_fem.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.ins_neut.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.ins_plur.unaccented(), adj.lemma).as_bytes()).expect("writing success");
 
-                        writer.write(format!("{}, {}\n", adj.loc_masc.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.loc_fem.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.loc_neut.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.loc_plur.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.loc_masc.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.loc_fem.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.loc_neut.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.loc_plur.unaccented(), adj.lemma).as_bytes()).expect("writing success");
 
-                        writer.write(format!("{}, {}\n", adj.dat_masc.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.dat_fem.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.dat_neut.unaccented(), adj.lemma).as_bytes()).expect("writing success");
-                        writer.write(format!("{}, {}\n", adj.dat_plur.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.dat_masc.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.dat_fem.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.dat_neut.unaccented(), adj.lemma).as_bytes()).expect("writing success");
+                        writer.write(format!("{}|{}\n", adj.dat_plur.unaccented(), adj.lemma).as_bytes()).expect("writing success");
 
-                        if let Some(form) = adj.m_short { writer.write(format!("{}, {}\n", form.unaccented(), adj.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = adj.f_short { writer.write(format!("{}, {}\n", form.unaccented(), adj.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = adj.n_short { writer.write(format!("{}, {}\n", form.unaccented(), adj.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = adj.p_short { writer.write(format!("{}, {}\n", form.unaccented(), adj.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = adj.m_short { writer.write(format!("{}|{}\n", form.unaccented(), adj.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = adj.f_short { writer.write(format!("{}|{}\n", form.unaccented(), adj.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = adj.n_short { writer.write(format!("{}|{}\n", form.unaccented(), adj.lemma).as_bytes()).expect("writing success"); };
+                        if let Some(form) = adj.p_short { writer.write(format!("{}|{}\n", form.unaccented(), adj.lemma).as_bytes()).expect("writing success"); };
 
                     },
                     _ => panic!("Unrecognized type encountered in the Type (part of speech) column: {part_of_speech}")

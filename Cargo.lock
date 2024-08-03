@@ -3126,6 +3126,7 @@ dependencies = [
 [[package]]
 name = "wiktionary_parser"
 version = "0.1.0"
+source = "git+https://github.com/Noah3141/wiktionary_parser#f10750611369a3cdecf326c486d27f621c96e6c4"
 dependencies = [
  "html-escape",
  "regex",

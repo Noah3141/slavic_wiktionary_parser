@@ -37,7 +37,7 @@ pub async fn json_to_entry_csv(
     out_file.read_to_string(&mut holding_string).expect("reading to holding string");
     let mut present_lemmas: Vec<&str> = holding_string
         .lines()
-        .map(|line| {select_from(line, ",", ",").unwrap().trim() })
+        .map(|line| {&line[..line.find("|").unwrap()]})
         .collect();
 
 
@@ -95,7 +95,7 @@ pub async fn json_to_entry_csv(
                 ).expect("serialization of db dictionary_info model as json");
                 
                 writer.write(
-                    format!("{id}, {lemma}, {commonality}, {pos_type}, {dictionary_info}\n", id="NULL", lemma=ru_conj.lemma(), commonality="NULL", pos_type="Verb", dictionary_info=dictionary_info ).as_bytes()
+                    format!("{lemma}|{commonality}|{pos_type}|{dictionary_info}\n", lemma=ru_conj.lemma(), commonality="NULL", pos_type="Verb", dictionary_info=dictionary_info ).as_bytes()
                 ).expect("writing of bytes");
             }
             println!("Verbs complete!");
@@ -147,7 +147,7 @@ pub async fn json_to_entry_csv(
                 ).expect("serialization of db dictionary_info model as json");
                 
                 writer.write(
-                    format!("{id}, {lemma}, {commonality}, {pos_type}, {dictionary_info}\n", id="NULL", lemma=ru_noun_table.lemma(), commonality="NULL", pos_type="Noun", dictionary_info=dictionary_info ).as_bytes()
+                    format!("{lemma}|{commonality}|{pos_type}|{dictionary_info}\n", lemma=ru_noun_table.lemma(), commonality="NULL", pos_type="Noun", dictionary_info=dictionary_info ).as_bytes()
                 ).expect("writing of bytes");
             }
             println!("Nouns complete!");
@@ -184,7 +184,7 @@ pub async fn json_to_entry_csv(
                 ).expect("serialization of db dictionary_info model as json");
                 
                 writer.write(
-                    format!("{id}, {lemma}, {commonality}, {pos_type}, {dictionary_info}\n", id="NULL", lemma=ru_adj_decl.lemma(), commonality="NULL", pos_type="Adjective", dictionary_info=dictionary_info ).as_bytes()
+                    format!("{lemma}|{commonality}|{pos_type}|{dictionary_info}\n", lemma=ru_adj_decl.lemma(), commonality="NULL", pos_type="Adjective", dictionary_info=dictionary_info ).as_bytes()
                 ).expect("writing of bytes");
             }
 
@@ -238,7 +238,7 @@ pub async fn json_to_entry_csv(
                 ).expect("serialization of db dictionary_info model as json");
                 
                 writer.write(
-                    format!("{id}, {lemma}, {commonality}, {pos_type}, {dictionary_info}\n", id="NULL", lemma=uk_conj.lemma(), commonality="NULL", pos_type="Verb", dictionary_info=dictionary_info ).as_bytes()
+                    format!("{lemma}|{commonality}|{pos_type}|{dictionary_info}\n", lemma=uk_conj.lemma(), commonality="NULL", pos_type="Verb", dictionary_info=dictionary_info ).as_bytes()
                 ).expect("writing of bytes");
             }
             println!("Verbs complete!");
@@ -290,7 +290,7 @@ pub async fn json_to_entry_csv(
                 ).expect("serialization of db dictionary_info model as json");
                 
                 writer.write(
-                    format!("{id}, {lemma}, {commonality}, {pos_type}, {dictionary_info}\n", id="NULL", lemma=uk_noun_table.lemma(), commonality="NULL", pos_type="Noun", dictionary_info=dictionary_info ).as_bytes()
+                    format!("{lemma}|{commonality}|{pos_type}|{dictionary_info}\n", lemma=uk_noun_table.lemma(), commonality="NULL", pos_type="Noun", dictionary_info=dictionary_info ).as_bytes()
                 ).expect("writing of bytes");
             }
             println!("Nouns complete!");
@@ -327,7 +327,7 @@ pub async fn json_to_entry_csv(
                 ).expect("serialization of db dictionary_info model as json");
                 
                 writer.write(
-                    format!("{id}, {lemma}, {commonality}, {pos_type}, {dictionary_info}\n", id="NULL", lemma=uk_adj_table.lemma(), commonality="NULL", pos_type="Adjective", dictionary_info=dictionary_info ).as_bytes()
+                    format!("{lemma}|{commonality}|{pos_type}|{dictionary_info}\n", lemma=uk_adj_table.lemma(), commonality="NULL", pos_type="Adjective", dictionary_info=dictionary_info ).as_bytes()
                 ).expect("writing of bytes");
             }
 
@@ -396,7 +396,7 @@ pub async fn json_to_entry_csv(
                 ).expect("serialization of db dictionary_info model as json");
                 
                 writer.write(
-                    format!("{id}, {lemma}, {commonality}, {pos_type}, {dictionary_info}\n", id="NULL", lemma=be_conj.lemma(), commonality="NULL", pos_type="Verb", dictionary_info=dictionary_info ).as_bytes()
+                    format!("{lemma}|{commonality}|{pos_type}|{dictionary_info}\n", lemma=be_conj.lemma(), commonality="NULL", pos_type="Verb", dictionary_info=dictionary_info ).as_bytes()
                 ).expect("writing of bytes");
             }
             println!("Verbs complete!");
@@ -448,7 +448,7 @@ pub async fn json_to_entry_csv(
                 ).expect("serialization of db dictionary_info model as json");
                 
                 writer.write(
-                    format!("{id}, {lemma}, {commonality}, {pos_type}, {dictionary_info}\n", id="NULL", lemma=be_noun_table.lemma(), commonality="NULL", pos_type="Noun", dictionary_info=dictionary_info ).as_bytes()
+                    format!("{lemma}|{commonality}|{pos_type}|{dictionary_info}\n", lemma=be_noun_table.lemma(), commonality="NULL", pos_type="Noun", dictionary_info=dictionary_info ).as_bytes()
                 ).expect("writing of bytes");
             }
             println!("Nouns complete!");
@@ -486,7 +486,7 @@ pub async fn json_to_entry_csv(
                 ).expect("serialization of db dictionary_info model as json");
                 
                 writer.write(
-                    format!("{id}, {lemma}, {commonality}, {pos_type}, {dictionary_info}\n", id="NULL", lemma=be_adj_table.lemma(), commonality="NULL", pos_type="Adjective", dictionary_info=dictionary_info ).as_bytes()
+                    format!("{lemma}|{commonality}|{pos_type}|{dictionary_info}\n", lemma=be_adj_table.lemma(), commonality="NULL", pos_type="Adjective", dictionary_info=dictionary_info ).as_bytes()
                 ).expect("writing of bytes");
             }
 
