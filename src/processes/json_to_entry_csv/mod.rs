@@ -342,6 +342,10 @@ pub async fn json_to_entry_csv(
         Language::Belarusian => {
             println!("Processing Belarusian...");
 
+            present_lemmas.insert(0, "да́ныя");
+            present_lemmas.insert(0, "клубни́ка");
+            present_lemmas.insert(0, "Бяро́заsg&gt;");
+
             use wiktionary_parser::models::wiktionary_macro::belarusian;
             use rubit_api_db::dictionary_info::belarusian::*;
             use wiktionary_parser::models::wiktionary_macro::belarusian::{
