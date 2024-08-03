@@ -1,6 +1,4 @@
 use std::{fs::File, io::{BufReader, Write}};
-
-use russian::{ru_conj, RuConj};
 use wiktionary_parser::models::{language::Language, wiktionary_macro::*};
 
 mod processes;
@@ -15,51 +13,19 @@ mod constants;
 #[tokio::main]
 async fn main() {
     
-    // processes::dump_to_filtered(
-    //     "C:/Users/Noah3/Code/slavic_wiktionary_parser/data/wiki_dumps/en_wiktionary.xml",
-    //     "C:/Users/Noah3/Code/slavic_wiktionary_parser/data/filtered_wiki_dump/ukrainian.txt",
-    //     &["==Ukrainian=="]
-    // ).expect("success");
-    // processes::dump_to_filtered(
-    //     "C:/Users/Noah3/Code/slavic_wiktionary_parser/data/wiki_dumps/en_wiktionary.xml",
-    //     "C:/Users/Noah3/Code/slavic_wiktionary_parser/data/filtered_wiki_dump/russian.txt",
-    //     &["==Russian=="]
-    // ).expect("success");
-    // processes::dump_to_filtered(
-    //     "C:/Users/Noah3/Code/slavic_wiktionary_parser/data/wiki_dumps/en_wiktionary.xml",
-    //     "C:/Users/Noah3/Code/slavic_wiktionary_parser/data/filtered_wiki_dump/belarusian.txt",
-    //     &["==Belarusian=="]
-    // ).expect("success");
+    processes::json_to_entry_csv(
+        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\parsed\\russian.json", 
+        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\russian_complete\\entries.csv", 
+        Language::Russian
+    ).await.expect("the best");
 
-    // processes::filtered_to_json(
-    //     "C:/Users/Noah3/Code/slavic_wiktionary_parser/data/filtered_wiki_dump/belarusian.txt",
-    //     "C:/Users/Noah3/Code/slavic_wiktionary_parser/data/parsed/belarusian.json",
-    //     true,
-    //     Language::Belarusian
-    // ).expect("success");
-    // processes::filtered_to_json(
-    //     "C:/Users/Noah3/Code/slavic_wiktionary_parser/data/filtered_wiki_dump/russian.txt",
-    //     "C:/Users/Noah3/Code/slavic_wiktionary_parser/data/parsed/russian2.json",
-    //     true,
-    //     Language::Russian
-    // ).expect("success");
-    // processes::filtered_to_json(
-    //     "C:/Users/Noah3/Code/slavic_wiktionary_parser/data/filtered_wiki_dump/ukrainian.txt",
-    //     "C:/Users/Noah3/Code/slavic_wiktionary_parser/data/parsed/ukrainian.json",
-    //     true,
-    //     Language::Ukrainian
-    // ).expect("success");
+    processes::entry_csv_to_lemma_csv(
+        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\russian_complete\\entries.csv", 
+        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\russian_complete\\form_lemma.csv",
+        true,
+        Language::Russian 
+    ).expect("success")
 
-
-    // processes::json_to_entry_csv(
-    //     "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\parsed\\belarusian.json", 
-    //     "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\belarusian_complete\\entries.csv", 
-    //     Language::Belarusian,
-    // ).await.expect("json_to_entry_csv success");
-
-
-
-    // explore()
 }
 
 

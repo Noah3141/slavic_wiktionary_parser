@@ -1,6 +1,6 @@
 
 use std::{fs::File, io::{BufReader, BufWriter, Read, Write}};
-use wiktionary_parser::utils::select_from;
+use wiktionary_parser::{models::section_header::SectionHeader, utils::select_from};
 use wiktionary_parser::models::{
     language::Language, 
     wiktionary_macro::{
@@ -17,7 +17,7 @@ pub async fn json_to_entry_csv(
 ) -> Result<(), ()> {
     println!("Reading file...");
     let reader = BufReader::with_capacity(
-        1024*1024*250, 
+        1024*1024*4, 
         File::open(json_file).unwrap()
     );
     let wiki_macros: Vec<WiktionaryMacro> = serde_json::from_reader(reader).unwrap();
@@ -54,15 +54,20 @@ pub async fn json_to_entry_csv(
             // Manual overrides:
             present_lemmas.insert(0,"ка\u{301}мхорить");
             present_lemmas.insert(0,"ны\u{301}кать");
+            present_lemmas.insert(0,"три");
+            present_lemmas.insert(0,"сто");
+            present_lemmas.insert(0,"кто");
+            present_lemmas.insert(0,"что");
+            present_lemmas.insert(0,"четы́ре");
             println!("Processing Russian...");
 
-            use wiktionary_parser::models::wiktionary_macro::russian;
+            // use wiktionary_parser::models::wiktionary_macro::russian;
             use rubit_api_db::dictionary_info::russian::*;
-            use wiktionary_parser::models::wiktionary_macro::russian::{
-                RuConj,  ru_conj,
-                RuDeclAdj,  ru_decl_adj,
-                RuNounTable, ru_noun_table
-            };
+            // use wiktionary_parser::models::wiktionary_macro::russian::{
+            //     RuConj,  ru_conj,
+            //     RuDeclAdj,  ru_decl_adj,
+            //     RuNounTable, ru_noun_table
+            // };
 
             // Russian
             // Verbs
@@ -98,8 +103,9 @@ pub async fn json_to_entry_csv(
                     format!("{lemma}|{commonality}|{pos_type}|{dictionary_info}\n", lemma=ru_conj.lemma(), commonality="NULL", pos_type="Verb", dictionary_info=dictionary_info ).as_bytes()
                 ).expect("writing of bytes");
             }
+
+            writer.flush().expect("flush!");
             println!("Verbs complete!");
-            
 
             // Russian
             // Noun
@@ -150,6 +156,8 @@ pub async fn json_to_entry_csv(
                     format!("{lemma}|{commonality}|{pos_type}|{dictionary_info}\n", lemma=ru_noun_table.lemma(), commonality="NULL", pos_type="Noun", dictionary_info=dictionary_info ).as_bytes()
                 ).expect("writing of bytes");
             }
+
+            writer.flush().expect("flush!");
             println!("Nouns complete!");
             
             // Russian
@@ -164,7 +172,7 @@ pub async fn json_to_entry_csv(
             let ru_adj_declensions = wiki_macros.iter()
                 .filter_map(|m| match m { WiktionaryMacro::RuDeclAdj(n) => Some(n), _ => None })
                 .filter(|m| !present_lemmas.contains(&m.lemma().trim()))
-                .filter(|m| !m.is_old());
+                .filter(|m| !m.is_old() && m.section != SectionHeader::ProperNoun);
             
             println!("Adjectives not yet processed: {}", ru_adj_declensions.clone().count());
             for ru_adj_decl in ru_adj_declensions {
@@ -346,13 +354,13 @@ pub async fn json_to_entry_csv(
             present_lemmas.insert(0, "клубни́ка");
             present_lemmas.insert(0, "Бяро́заsg&gt;");
 
-            use wiktionary_parser::models::wiktionary_macro::belarusian;
+            // use wiktionary_parser::models::wiktionary_macro::belarusian;
             use rubit_api_db::dictionary_info::belarusian::*;
-            use wiktionary_parser::models::wiktionary_macro::belarusian::{
-                BeConj,  be_conj,
-                BeADecl,  be_adecl,
-                BeNDecl, be_ndecl
-            };
+            // use wiktionary_parser::models::wiktionary_macro::belarusian::{
+            //     BeConj,  be_conj,
+            //     BeADecl,  be_adecl,
+            //     BeNDecl, be_ndecl
+            // };
 
             // Belarusian
             // Verbs
