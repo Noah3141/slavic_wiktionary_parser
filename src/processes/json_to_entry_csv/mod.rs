@@ -464,7 +464,8 @@ pub async fn json_to_entry_csv(
         
             let be_adj_tables = wiki_macros.iter()
                 .filter_map(|m| match m { WiktionaryMacro::BeADecl(n) => Some(n), _ => None })
-                .filter(|m| !present_lemmas.contains(&m.lemma().trim()));
+                .filter(|m| !present_lemmas.contains(&m.lemma().trim()))
+                .filter(|m| !m.is_surname());
                 // .filter(|m| !m.is_old());
             
             println!("Adjectives not yet processed: {}", be_adj_tables.clone().count());

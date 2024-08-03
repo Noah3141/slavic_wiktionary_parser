@@ -53,11 +53,18 @@ async fn main() {
     //     Language::Russian,
     // ).await.expect("json_to_form_lemma success");
 
-    processes::json_to_entry_csv(
-        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\parsed\\belarusian.json", 
-        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\belarusian_complete\\entries.csv", 
-        Language::Belarusian,
-    ).await.expect("json_to_entry_csv success");
+    // processes::json_to_entry_csv(
+    //     "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\parsed\\belarusian.json", 
+    //     "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\belarusian_complete\\entries.csv", 
+    //     Language::Belarusian,
+    // ).await.expect("json_to_entry_csv success");
+
+    processes::entry_csv_to_lemma_csv(
+        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\belarusian_complete\\entries.csv",
+        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\belarusian_complete\\form_lemma.csv",
+        true,
+        Language::Belarusian
+    ).expect("");
 
     // explore()
 }
