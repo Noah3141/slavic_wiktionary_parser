@@ -8,6 +8,10 @@ mod traits;
 mod utils;
 mod constants;
 
+/// 1) `processes::dump_to_filtered`
+/// 2) `processes::filtered_to_json`
+/// 3) `processes::json_to_entry_csv`
+/// 4) `processes::entry_csv_to_lemma_csv`
 #[tokio::main]
 async fn main() {
     
@@ -46,12 +50,6 @@ async fn main() {
     //     Language::Ukrainian
     // ).expect("success");
 
-    // processes::json_to_form_lemma(
-    //     "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\parsed\\russian.json", 
-    //     "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\russian_complete\\form_lemma_verbs.csv", 
-    //     false, 
-    //     Language::Russian,
-    // ).await.expect("json_to_form_lemma success");
 
     // processes::json_to_entry_csv(
     //     "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\parsed\\belarusian.json", 
@@ -59,12 +57,7 @@ async fn main() {
     //     Language::Belarusian,
     // ).await.expect("json_to_entry_csv success");
 
-    processes::entry_csv_to_lemma_csv(
-        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\belarusian_complete\\entries.csv",
-        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\belarusian_complete\\form_lemma.csv",
-        true,
-        Language::Belarusian
-    ).expect("");
+
 
     // explore()
 }
