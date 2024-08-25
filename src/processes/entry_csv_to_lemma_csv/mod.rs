@@ -1,18 +1,18 @@
-use std::{fs::File, io::{BufWriter, Read, Write}};
+use std::{
+    fs::File,
+    io::{BufWriter, Read, Write},
+};
 
 use wiktionary_parser::models::language::Language;
 
 use crate::traits::accented::Accented;
 
-
-
 pub fn entry_csv_to_lemma_csv(
-    entry_csv: &str, 
-    out: &str, 
+    entry_csv: &str,
+    out: &str,
     overwrite: bool,
     language: Language,
-) -> Result<(), ()>  {
-
+) -> Result<(), ()> {
     let out_file = match overwrite {
         true => File::options()
             .read(true)
@@ -27,10 +27,10 @@ pub fn entry_csv_to_lemma_csv(
             .truncate(false)
             .create_new(true)
             .open(out)
-            .expect("creation of out file with !overwrite")
+            .expect("creation of out file with !overwrite"),
     };
 
-    let mut writer = BufWriter::with_capacity(1024*6, out_file);
+    let mut writer = BufWriter::with_capacity(1024 * 6, out_file);
 
     let mut csv = File::options()
         .read(true)
@@ -41,7 +41,8 @@ pub fn entry_csv_to_lemma_csv(
         .expect("opening the entry csv file");
 
     let mut csv_file_str = String::with_capacity(1024 * 6);
-    csv.read_to_string(&mut csv_file_str).expect("reading to string");
+    csv.read_to_string(&mut csv_file_str)
+        .expect("reading to string");
 
     let rows = csv_file_str.lines();
 
@@ -131,8 +132,7 @@ pub fn entry_csv_to_lemma_csv(
                     _ => panic!("Unrecognized type encountered in the Type (part of speech) column: {part_of_speech}")
                 }
             }
-
-        },
+        }
         Language::Ukrainian => {
             for row in rows {
                 let mut cols = row.split("|");
@@ -216,8 +216,7 @@ pub fn entry_csv_to_lemma_csv(
                     _ => panic!("Unrecognized type encountered in the Type (part of speech) column: {part_of_speech}")
                 }
             }
-
-        },
+        }
         Language::Belarusian => {
             for row in rows {
                 let mut cols = row.split("|");
@@ -229,23 +228,23 @@ pub fn entry_csv_to_lemma_csv(
                 match part_of_speech {
                     "Verb" => {
                         let verb: rubit_api_db::dictionary_info::belarusian::BelarusianVerb = serde_json::from_str(dictionary_info).expect("success of deserialization");
-                        if let Some(form) = verb.я_form { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.ты_form { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.ён_form { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.мы_form { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.вы_form { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.яны_form { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.masc_past { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.fem_past { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.neut_past { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.plur_past { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.past_passive { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.past_adverbial { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.past_active { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.present_active { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.present_adverbial { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.singular_imperative { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
-                        if let Some(form) = verb.plural_imperative { writer.write(format!("{}|{}\n", form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); };
+                        writer.write(format!("{}|{}\n", verb.я_form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
+                        writer.write(format!("{}|{}\n", verb.ты_form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
+                        writer.write(format!("{}|{}\n", verb.ён_form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
+                        writer.write(format!("{}|{}\n", verb.мы_form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
+                        writer.write(format!("{}|{}\n", verb.вы_form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
+                        writer.write(format!("{}|{}\n", verb.яны_form.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
+                        writer.write(format!("{}|{}\n", verb.masc_past.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
+                        writer.write(format!("{}|{}\n", verb.fem_past.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
+                        writer.write(format!("{}|{}\n", verb.neut_past.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
+                        writer.write(format!("{}|{}\n", verb.plur_past.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
+                        writer.write(format!("{}|{}\n", verb.past_passive.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
+                        writer.write(format!("{}|{}\n", verb.past_adverbial.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
+                        writer.write(format!("{}|{}\n", verb.past_active.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
+                        writer.write(format!("{}|{}\n", verb.present_active.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
+                        writer.write(format!("{}|{}\n", verb.present_adverbial.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
+                        writer.write(format!("{}|{}\n", verb.singular_imperative.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
+                        writer.write(format!("{}|{}\n", verb.plural_imperative.unaccented(), verb.lemma).as_bytes()).expect("writing success"); 
                     },
                     "Noun" => {
                         let noun: rubit_api_db::dictionary_info::belarusian::BelarusianNoun = serde_json::from_str(dictionary_info).expect("success of deserialization");
@@ -301,9 +300,8 @@ pub fn entry_csv_to_lemma_csv(
                     _ => panic!("Unrecognized type encountered in the Type (part of speech) column: {part_of_speech}")
                 }
             }
+        }
+    }
 
-        },
-    }    
-    
     Ok(())
 }

@@ -93,7 +93,8 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
                     _ => None,
                 })
                 .filter(|m| !present_lemmas.contains(&m.lemma().trim()))
-                .filter(|m| !m.is_old());
+                .filter(|m| !m.is_old())
+                .filter(|m| !m.is_impersonal());
 
             println!(
                 "Verbs not yet processed: {}",
@@ -612,7 +613,7 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
                     _ => None,
                 })
                 .filter(|m| !present_lemmas.contains(&m.lemma().trim()));
-            // .filter(|m| !m.is_old());
+            // .filter(|m| !m.is_impersonal());
 
             println!(
                 "Verbs not yet processed: {}",
