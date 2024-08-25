@@ -414,7 +414,7 @@ dependencies = [
  "sea-orm",
  "serde",
  "serde_json",
- "wiktionary_parser",
+ "wiktionary_parser 0.1.0",
 ]
 
 [[package]]
@@ -2255,7 +2255,7 @@ dependencies = [
  "serde_json",
  "tokio",
  "tokio-macros 0.2.6",
- "wiktionary_parser",
+ "wiktionary_parser 0.1.4",
 ]
 
 [[package]]
@@ -3126,7 +3126,21 @@ dependencies = [
 [[package]]
 name = "wiktionary_parser"
 version = "0.1.0"
-source = "git+https://github.com/Noah3141/wiktionary_parser?branch=master#41f05c564aa87b514f7f5bbd0a00dacf366b85b7"
+source = "git+https://github.com/Noah3141/wiktionary_parser.git?branch=master#ba8bcc2eba869b4b68ae9afbfc5287d8640bf96c"
+dependencies = [
+ "html-escape",
+ "regex",
+ "reqwest",
+ "scraper",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-macros 0.2.6",
+]
+
+[[package]]
+name = "wiktionary_parser"
+version = "0.1.4"
 dependencies = [
  "html-escape",
  "regex",

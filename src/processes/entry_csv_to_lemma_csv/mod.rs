@@ -40,7 +40,7 @@ pub fn entry_csv_to_lemma_csv(
         .open(entry_csv)
         .expect("opening the entry csv file");
 
-    let mut csv_file_str = String::with_capacity(1024 * 3);
+    let mut csv_file_str = String::with_capacity(1024 * 6);
     csv.read_to_string(&mut csv_file_str).expect("reading to string");
 
     let rows = csv_file_str.lines();
@@ -50,8 +50,7 @@ pub fn entry_csv_to_lemma_csv(
     match language {
         Language::Russian => {
             for row in rows {
-                let mut cols = row.split(", ");
-                let id = cols.next().expect("id col");
+                let mut cols = row.split("|");
                 let lemma = cols.next().expect("lemma col");
                 let commonality = cols.next().expect("commonality col");
                 let part_of_speech = cols.next().expect("part_of_speech col");
@@ -136,8 +135,7 @@ pub fn entry_csv_to_lemma_csv(
         },
         Language::Ukrainian => {
             for row in rows {
-                let mut cols = row.split(", ");
-                let id = cols.next().expect("id col");
+                let mut cols = row.split("|");
                 let lemma = cols.next().expect("lemma col");
                 let commonality = cols.next().expect("commonality col");
                 let part_of_speech = cols.next().expect("part_of_speech col");
@@ -222,8 +220,7 @@ pub fn entry_csv_to_lemma_csv(
         },
         Language::Belarusian => {
             for row in rows {
-                let mut cols = row.split(", ");
-                let id = cols.next().expect("id col");
+                let mut cols = row.split("|");
                 let lemma = cols.next().expect("lemma col");
                 let commonality = cols.next().expect("commonality col");
                 let part_of_speech = cols.next().expect("part_of_speech col");
