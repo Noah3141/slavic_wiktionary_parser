@@ -17,3 +17,7 @@ pub use json_to_entry_csv::json_to_entry_csv;
 
 pub mod entry_csv_to_lemma_csv;
 pub use entry_csv_to_lemma_csv:: entry_csv_to_lemma_csv;
+
+
+pub mod extract_meanings;
+pub use extract_meanings::extract_meanings;

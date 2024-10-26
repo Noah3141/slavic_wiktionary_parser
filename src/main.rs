@@ -1,8 +1,6 @@
-use russian::RuAdj;
 use std::{
-    collections::HashMap,
     fs::File,
-    io::{BufReader, Write},
+    io::{BufReader, Write}, os::windows::process,
 };
 use wiktionary_parser::models::{language::Language, wiktionary_macro::*};
 
@@ -10,6 +8,7 @@ mod constants;
 mod processes;
 mod traits;
 mod utils;
+mod funcs;
 
 /// 1) `processes::dump_to_filtered`
 /// 2) `processes::filtered_to_json`
@@ -17,20 +16,29 @@ mod utils;
 /// 4) `processes::entry_csv_to_lemma_csv`
 #[tokio::main]
 async fn main() {
-    processes::json_to_entry_csv(
-        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\parsed\\belarusian.json",
-        "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\belarusian_complete\\entries_002.csv",
-        Language::Belarusian,
-    )
-    .await
-    .expect("the best");
+    // processes::json_to_entry_csv(
+    //     "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\parsed\\russian.json",
+    //     "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\russian_complete\\entries_002.csv",
+    //     Language::Russian,
+    // )
+    // .await
+    // .expect("the best");
 
     // processes::entry_csv_to_lemma_csv(
-    //     "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\russian_complete\\entries.csv",
-    //     "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\russian_complete\\form_lemma.csv",
+    //     "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\russian_complete\\entries_002.csv",
+    //     "C:\\Users\\Noah3\\Code\\slavic_wiktionary_parser\\data\\russian_complete\\form_lemma_002.csv",
     //     true,
-    //     Language::Russian
-    // ).expect("success")
+    //     Language::Russian,
+    // )
+    // .expect("success")
+
+
+    processes::extract_meanings(
+        "./data/filtered_wiki_dump/russian.txt",
+        "./data/meanings/russian.txt",
+        &Language::Russian,
+        true
+    ).expect("Success!");
 }
 
 async fn explore() {

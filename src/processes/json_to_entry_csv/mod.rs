@@ -2,7 +2,8 @@ use std::{
     fs::File,
     io::{BufReader, BufWriter, Read, Write},
 };
-use wiktionary_parser::models::section_header::SectionHeader;
+use crate::utils::find_ipa_for;
+use wiktionary_parser::models::{section_header::SectionHeader,};
 use wiktionary_parser::models::{
     language::Language,
     wiktionary_macro::{Expand, WiktionaryMacro},
@@ -10,8 +11,12 @@ use wiktionary_parser::models::{
 
 pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -> Result<(), ()> {
     println!("Reading file...");
-    let reader = BufReader::with_capacity(1024 * 1024 * 4, File::open(json_file).unwrap());
-    let wiki_macros: Vec<WiktionaryMacro> = serde_json::from_reader(reader).unwrap();
+    let reader = BufReader::with_capacity(
+        1024 * 1024 * 4,
+        File::open(json_file).expect("buffer to initalize"),
+    );
+    let wiki_macros: Vec<WiktionaryMacro> =
+        serde_json::from_reader(reader).expect("wiki macros to read from reader");
     println!("Finished!");
 
     let mut out_file = File::options()
@@ -70,6 +75,16 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
             present_lemmas.insert(0, "при́сные");
             println!("Processing Russian...");
 
+            let ipa_macros: Vec<WiktionaryMacro> = wiki_macros.iter().filter(|m| {
+                match m {
+                    WiktionaryMacro::RuIpa(_) => true,
+                    WiktionaryMacro::Ipa(_) => true,
+                    _ => false
+                }
+            })
+            .map(|m: &WiktionaryMacro| -> WiktionaryMacro { m.clone() })
+            .collect();
+
             // use wiktionary_parser::models::wiktionary_macro::russian;
             use rubit_api_db::dictionary_info::russian::*;
             // use wiktionary_parser::models::wiktionary_macro::russian::{
@@ -103,24 +118,16 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
             for ru_conj in ru_conjugations {
                 i += 1;
                 if i % 50 == 0 {
+                    writer.flush().expect("flush");
                     println!("Processing: {}", &ru_conj.macro_text)
                 }
-                let ipa_string = wiki_macros
-                    .iter()
-                    .filter_map(|m| match m {
-                        WiktionaryMacro::RuIpa(n) => Some(n),
-                        _ => None,
-                    })
-                    .find(|ipa_m| ipa_m.page_id == ru_conj.page_id)
-                    .expect(
-                        format!(
-                            "ipa_string corresponding to ru_conj: {}",
-                            &ru_conj.macro_text
-                        )
-                        .as_str(),
-                    )
-                    .to_ipa_string(&client)
-                    .await;
+                let ipa_string = match find_ipa_for(ru_conj.page_id, &Language::Russian, &ipa_macros, &client).await {
+                    Some(ipa_string) => ipa_string,
+                    None => {
+                        println!("No ipa at all! {}", &ru_conj.macro_text);
+                        continue
+                    }
+                };
                 let conjugation = ru_conj.html(&client).await;
                 let dictionary_info = serde_json::to_string(&RussianVerb::build_from_ru_conj(
                     &ru_conj,
@@ -180,34 +187,11 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
                     println!("Processing: {}", &ru_noun_table.macro_text)
                 }
 
-                let ipa_string = {
-                    if let Some(m) = wiki_macros
-                        .iter()
-                        .filter_map(|m| match m {
-                            WiktionaryMacro::RuIpa(m) => Some(m),
-                            _ => None,
-                        })
-                        .find(|ipa_m| {
-                            ipa_m.page_id == ru_noun_table.page_id // This can be wrong due to complex pages, but should probably be over 80% accurate 95% of the time...
-                        })
-                    {
-                        m.to_ipa_string(&client).await
-                    } else {
-                        if let Some(ipa) = wiki_macros
-                            .iter()
-                            .filter_map(|m| match m {
-                                WiktionaryMacro::Ipa(ipa) => Some(ipa),
-                                _ => None,
-                            })
-                            .find(|ipa_m| {
-                                ipa_m.page_id == ru_noun_table.page_id // This can be wrong due to complex pages, but should probably be over 80% accurate 95% of the time...
-                            })
-                        {
-                            ipa.to_ipa_string(&client).await
-                        } else {
-                            println!("No ipa at all! {}", &ru_noun_table.macro_text);
-                            continue;
-                        }
+                let ipa_string = match find_ipa_for(ru_noun_table.page_id, &Language::Russian, &ipa_macros, &client).await {
+                    Some(ipa_string) => ipa_string,
+                    None => {
+                        println!("No ipa at all! {}", &ru_noun_table.macro_text);
+                        continue
                     }
                 };
 
@@ -279,36 +263,14 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
             for ru_adj_decl in ru_adj_declensions {
                 i += 1;
                 if i % 50 == 0 {
+                    writer.flush().expect("flush");
                     println!("Processing: {}", &ru_adj_decl.macro_text)
                 }
-                let ipa_string = {
-                    if let Some(m) = wiki_macros
-                        .iter()
-                        .filter_map(|m| match m {
-                            WiktionaryMacro::RuIpa(m) => Some(m),
-                            _ => None,
-                        })
-                        .find(|ipa_m| {
-                            ipa_m.page_id == ru_adj_decl.page_id // This can be wrong due to complex pages, but should probably be over 80% accurate 95% of the time...
-                        })
-                    {
-                        m.to_ipa_string(&client).await
-                    } else {
-                        if let Some(ipa) = wiki_macros
-                            .iter()
-                            .filter_map(|m| match m {
-                                WiktionaryMacro::Ipa(ipa) => Some(ipa),
-                                _ => None,
-                            })
-                            .find(|ipa_m| {
-                                ipa_m.page_id == ru_adj_decl.page_id // This can be wrong due to complex pages, but should probably be over 80% accurate 95% of the time...
-                            })
-                        {
-                            ipa.to_ipa_string(&client).await
-                        } else {
-                            println!("No ipa at all! {}", &ru_adj_decl.macro_text);
-                            continue;
-                        }
+                let ipa_string = match find_ipa_for(ru_adj_decl.page_id, &Language::Russian, &ipa_macros, &client).await {
+                    Some(ipa_string) => ipa_string,
+                    None => {
+                        println!("No ipa at all! {}", &ru_adj_decl.macro_text);
+                        continue
                     }
                 };
                 let declension = ru_adj_decl.html(&client).await;
@@ -349,7 +311,68 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
             }
 
             println!("Adjectives complete!");
+            writer.flush().expect("flush!");
+            
 
+            // Russian
+            // Adverb
+            //
+            drop(client);
+            let client = reqwest::Client::builder()
+                .pool_idle_timeout(None)
+                .build()
+                .expect("Client build process");
+
+            
+            let ru_adverbs = wiki_macros
+                .iter()
+                .filter_map(|m| match m {
+                    WiktionaryMacro::RuAdv(n) => Some(n),
+                    _ => None,
+                })
+                .filter(|m| !present_lemmas.contains(&m.lemma().trim()));
+            
+            println!(
+                "Adverbs not yet processed: {}",
+                ru_adverbs.clone().count()
+            );
+            for ru_adv in ru_adverbs {
+                i += 1;
+                if i % 50 == 0 {
+                    writer.flush().expect("flush");
+                    println!("Processing: {}", &ru_adv.macro_text)
+                }
+                let ipa_string = match find_ipa_for(ru_adv.page_id, &Language::Russian, &ipa_macros, &client).await {
+                    Some(ipa_string) => ipa_string,
+                    None => {
+                        println!("No ipa at all! {}", &ru_adv.macro_text);
+                        continue
+                    }
+                };
+            
+
+                let dictionary_info =
+                    serde_json::to_string(&RussianAdverb::build_from_ru_adv(
+                        &ru_adv,
+                        ipa_string,
+                    ))
+                    .expect("serialization of db dictionary_info model as json");
+
+                writer
+                    .write(
+                        format!(
+                            "{lemma}|{commonality}|{pos_type}|{dictionary_info}\n",
+                            lemma = ru_adv.lemma(),
+                            commonality = "NULL",
+                            pos_type = "Adverb",
+                            dictionary_info = dictionary_info
+                        )
+                        .as_bytes(),
+                    )
+                    .expect("writing of bytes");
+            }
+
+            println!("Adverbs complete!");
             writer.flush().expect("flush!");
 
             println!("Entry CSV complete!");
@@ -363,6 +386,64 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
             use wiktionary_parser::models::wiktionary_macro::ukrainian;
             use wiktionary_parser::models::wiktionary_macro::ukrainian::{
                 uk_adecl, uk_conj, uk_ndecl, UkADecl, UkConj, UkNDecl,
+            };
+
+            present_lemmas.insert(0, "бу́блик");
+            present_lemmas.insert(0, "па\u{301}луба");
+            present_lemmas.insert(0, "киргѝзомо́вний");
+
+            // One day worth fixing but need to speed up iteration now
+            {
+                present_lemmas.insert(0, "па\u{301}луба");
+                present_lemmas.insert(0, "рок");
+                present_lemmas.insert(0, "ткани́на");
+                present_lemmas.insert(0, "гри́вна");
+                present_lemmas.insert(0, "листоно́ша");
+                present_lemmas.insert(0, "Херсо́н");
+                present_lemmas.insert(0, "поли́ва");
+                present_lemmas.insert(0, "е́хо:ovi&gt");
+                present_lemmas.insert(0, "пегмати́т");
+                present_lemmas.insert(0, "криха́");
+                present_lemmas.insert(0, "га́йда");
+                present_lemmas.insert(0, "га́йда");
+                present_lemmas.insert(0, "констру́кт");
+                present_lemmas.insert(0, "дя́ка");
+                present_lemmas.insert(0, "книгозбі́рня");
+                present_lemmas.insert(0, "Болга́рщина");
+                present_lemmas.insert(0, "вагани́");
+                present_lemmas.insert(0, "сагайда́к");
+                present_lemmas.insert(0, "путіні́зм");
+                present_lemmas.insert(0, "вікісловни́к");
+                present_lemmas.insert(0, "тризу́б");
+                present_lemmas.insert(0, "гематоге́н");
+                present_lemmas.insert(0, "Чорноба́й");
+                present_lemmas.insert(0, "інтерне́т");
+                present_lemmas.insert(0, "москва́");
+                present_lemmas.insert(0, "по́цька");
+                present_lemmas.insert(0, "Вакарчу́к");
+                present_lemmas.insert(0, "бісексуалі́зм");
+                present_lemmas.insert(0, "андрогі́нія");
+                present_lemmas.insert(0, "Куматре́нко");
+                present_lemmas.insert(0, "я́нгол");
+                present_lemmas.insert(0, "-щи́на");
+                present_lemmas.insert(0, "держкомі́сія");
+                present_lemmas.insert(0, "неоти́п");
+                present_lemmas.insert(0, "Діоні́сій");
+                present_lemmas.insert(0, "-ї́вна");
+                present_lemmas.insert(0, "маркі́з");
+                present_lemmas.insert(0, "дофі́н");
+                present_lemmas.insert(0, "коло́дій");
+                present_lemmas.insert(0, "безві́з");
+                present_lemmas.insert(0, "число́ з рухо́мою ко́мою");
+                present_lemmas.insert(0, "чортопха́йка");
+                present_lemmas.insert(0, "спе́ція");
+                present_lemmas.insert(0, "ади́кція");
+                present_lemmas.insert(0, "трильйо́н");
+                present_lemmas.insert(0, "гниття́");
+                present_lemmas.insert(0, "СБУ́шник");
+                present_lemmas.insert(0, "наступнорічни́й");
+                present_lemmas.insert(0, "тогорі́чний");
+                present_lemmas.insert(0, "преподо́бний");
             };
 
             // Ukrainian
@@ -379,8 +460,8 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
                     WiktionaryMacro::UkConj(n) => Some(n),
                     _ => None,
                 })
-                .filter(|m| !present_lemmas.contains(&m.lemma().trim()));
-            // .filter(|m| !m.is_old());
+                .filter(|m| !present_lemmas.contains(&m.lemma().trim()))
+                .filter(|m| !m.is_impersonal());
 
             println!(
                 "Verbs not yet processed: {}",
@@ -389,24 +470,16 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
             for uk_conj in uk_conjugations {
                 i += 1;
                 if i % 50 == 0 {
+                    writer.flush().expect("flush");
                     println!("Processing: {}", &uk_conj.macro_text)
                 }
-                let ipa_string = wiki_macros
-                    .iter()
-                    .filter_map(|m| match m {
-                        WiktionaryMacro::UkIpa(n) => Some(n),
-                        _ => None,
-                    })
-                    .find(|ipa_m| ipa_m.page_id == uk_conj.page_id)
-                    .expect(
-                        format!(
-                            "ipa_string corresponding to uk_conj: {}",
-                            &uk_conj.macro_text
-                        )
-                        .as_str(),
-                    )
-                    .to_ipa_string(&client)
-                    .await;
+                let ipa_string = match find_ipa_for(uk_conj.page_id, &Language::Ukrainian, &wiki_macros, &client).await {
+                    Some(ipa_string) => ipa_string,
+                    None => {
+                        println!("No ipa at all! {}", &uk_conj.macro_text);
+                        continue
+                    }
+                };
                 let conjugation = uk_conj.html(&client).await;
                 let dictionary_info = serde_json::to_string(&UkrainianVerb::build_from_uk_conj(
                     &uk_conj,
@@ -429,6 +502,7 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
                     .expect("writing of bytes");
             }
             println!("Verbs complete!");
+            writer.flush().expect("flush!");
 
             // Ukrainian
             // Noun
@@ -456,41 +530,30 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
             for uk_noun_table in uk_noun_tables {
                 i += 1;
                 if i % 50 == 0 {
+                    writer.flush().expect("flush");
                     println!("Processing: {}", &uk_noun_table.macro_text)
                 }
 
-                let ipa_string = {
-                    if let Some(m) = wiki_macros
-                        .iter()
-                        .filter_map(|m| match m {
-                            WiktionaryMacro::UkIpa(m) => Some(m),
-                            _ => None,
-                        })
-                        .find(|ipa_m| {
-                            ipa_m.page_id == uk_noun_table.page_id // This can be wrong due to complex pages, but should probably be over 80% accurate 95% of the time...
-                        })
-                    {
-                        m.to_ipa_string(&client).await
-                    } else {
-                        if let Some(ipa) = wiki_macros
-                            .iter()
-                            .filter_map(|m| match m {
-                                WiktionaryMacro::Ipa(ipa) => Some(ipa),
-                                _ => None,
-                            })
-                            .find(|ipa_m| {
-                                ipa_m.page_id == uk_noun_table.page_id // This can be wrong due to complex pages, but should probably be over 80% accurate 95% of the time...
-                            })
-                        {
-                            ipa.to_ipa_string(&client).await
-                        } else {
-                            println!("No ipa at all! {}", &uk_noun_table.macro_text);
-                            continue;
-                        }
+                let ipa_string = match find_ipa_for(uk_noun_table.page_id, &Language::Ukrainian, &wiki_macros, &client).await {
+                    Some(ipa_string) => ipa_string,
+                    None => {
+                        println!("No ipa at all! {}", &uk_noun_table.macro_text);
+                        continue
                     }
                 };
 
                 let declension = uk_noun_table.html(&client).await;
+                if uk_noun_table
+                    .check_head(&declension, "indecl")
+                    .expect("Checking head to word")
+                    || uk_noun_table
+                        .check_head(&declension, "adj ")
+                        .expect("Checking head to word")
+                {
+                    continue;
+                }
+                println!("{}", uk_noun_table.macro_text);
+                
                 let dictionary_info = serde_json::to_string(&UkrainianNoun::build_from_uk_ndecl(
                     &uk_noun_table,
                     ipa_string,
@@ -512,6 +575,7 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
                     .expect("writing of bytes");
             }
             println!("Nouns complete!");
+            writer.flush().expect("flush!");
 
             // Ukrainian
             // Adjectives
@@ -528,8 +592,13 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
                     WiktionaryMacro::UkADecl(n) => Some(n),
                     _ => None,
                 })
-                .filter(|m| !present_lemmas.contains(&m.lemma().trim()));
-            // .filter(|m| !m.is_old());
+                .filter(|m| !present_lemmas.contains(&m.lemma().trim()))
+                .filter(|m| !m.lemma().starts_with("-")
+                    && !m.lemma().ends_with("ин")
+                    && m.section != SectionHeader::ProperNoun
+                    && m.section != SectionHeader::Determiner
+                    && m.section != SectionHeader::Numeral
+                );
 
             println!(
                 "Adjectives not yet processed: {}",
@@ -538,21 +607,19 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
             for uk_adj_table in uk_adj_tables {
                 i += 1;
                 if i % 50 == 0 {
+                    writer.flush().expect("flush");
                     println!("Processing: {}", &uk_adj_table.macro_text)
                 }
-                let ipa_string = wiki_macros
-                    .iter()
-                    .filter_map(|m| match m {
-                        WiktionaryMacro::UkIpa(n) => Some(n),
-                        _ => None,
-                    })
-                    .find(|ipa_m| {
-                        ipa_m.page_id == uk_adj_table.page_id // This can be wrong due to complex pages, but should probably be over 80% accurate 95% of the time...
-                    })
-                    .expect("ipa_string corresponding to ru_adj_Decl")
-                    .to_ipa_string(&client)
-                    .await;
+                let ipa_string = match find_ipa_for(uk_adj_table.page_id, &Language::Ukrainian, &wiki_macros, &client).await {
+                    Some(ipa_string) => ipa_string,
+                    None => {
+                        println!("No ipa at all! {}", &uk_adj_table.macro_text);
+                        continue
+                    }
+                };
+
                 let declension = uk_adj_table.html(&client).await;
+                // println!("{}", declension.html());
                 let dictionary_info =
                     serde_json::to_string(&UkrainianAdjective::build_from_uk_adecl(
                         &uk_adj_table,
@@ -612,8 +679,8 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
                     WiktionaryMacro::BeConj(n) => Some(n),
                     _ => None,
                 })
-                .filter(|m| !present_lemmas.contains(&m.lemma().trim()));
-            // .filter(|m| !m.is_impersonal());
+                .filter(|m| !present_lemmas.contains(&m.lemma().trim()))
+                .filter(|m| !m.is_impersonal());
 
             println!(
                 "Verbs not yet processed: {}",
@@ -622,39 +689,18 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
             for be_conj in be_conjugations {
                 i += 1;
                 if i % 50 == 0 {
+                    writer.flush().expect("flush");
                     println!("Processing: {}", &be_conj.macro_text)
                 }
-                let ipa_string = {
-                    if let Some(m) = wiki_macros
-                        .iter()
-                        .filter_map(|m| match m {
-                            WiktionaryMacro::BeIpa(m) => Some(m),
-                            _ => None,
-                        })
-                        .find(|ipa_m| {
-                            ipa_m.page_id == be_conj.page_id // This can be wrong due to complex pages, but should probably be over 80% accurate 95% of the time...
-                        })
-                    {
-                        m.to_ipa_string(&client).await
-                    } else {
-                        if let Some(ipa) = wiki_macros
-                            .iter()
-                            .filter_map(|m| match m {
-                                WiktionaryMacro::Ipa(ipa) => Some(ipa),
-                                _ => None,
-                            })
-                            .find(|ipa_m| {
-                                ipa_m.page_id == be_conj.page_id // This can be wrong due to complex pages, but should probably be over 80% accurate 95% of the time...
-                            })
-                        {
-                            ipa.to_ipa_string(&client).await
-                        } else {
-                            println!("No ipa at all! {}", &be_conj.macro_text);
-                            continue;
-                        }
+                let ipa_string = match find_ipa_for(be_conj.page_id, &Language::Belarusian, &wiki_macros, &client).await {
+                    Some(ipa_string) => ipa_string,
+                    None => {
+                        println!("No ipa at all! {}", &be_conj.macro_text);
+                        continue
                     }
                 };
                 let conjugation = be_conj.html(&client).await;
+
                 let dictionary_info = serde_json::to_string(&BelarusianVerb::build_from_be_conj(
                     &be_conj,
                     ipa_string,
@@ -676,6 +722,7 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
                     .expect("writing of bytes");
             }
             println!("Verbs complete!");
+            writer.flush().expect("flush!");
 
             // Belarusian
             // Noun
@@ -703,37 +750,15 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
             for be_noun_table in be_noun_tables {
                 i += 1;
                 if i % 50 == 0 {
+                    writer.flush().expect("flush");
                     println!("Processing: {}", &be_noun_table.macro_text)
                 }
 
-                let ipa_string = {
-                    if let Some(m) = wiki_macros
-                        .iter()
-                        .filter_map(|m| match m {
-                            WiktionaryMacro::BeIpa(m) => Some(m),
-                            _ => None,
-                        })
-                        .find(|ipa_m| {
-                            ipa_m.page_id == be_noun_table.page_id // This can be wrong due to complex pages, but should probably be over 80% accurate 95% of the time...
-                        })
-                    {
-                        m.to_ipa_string(&client).await
-                    } else {
-                        if let Some(ipa) = wiki_macros
-                            .iter()
-                            .filter_map(|m| match m {
-                                WiktionaryMacro::Ipa(ipa) => Some(ipa),
-                                _ => None,
-                            })
-                            .find(|ipa_m| {
-                                ipa_m.page_id == be_noun_table.page_id // This can be wrong due to complex pages, but should probably be over 80% accurate 95% of the time...
-                            })
-                        {
-                            ipa.to_ipa_string(&client).await
-                        } else {
-                            println!("No ipa at all! {}", &be_noun_table.macro_text);
-                            continue;
-                        }
+                let ipa_string = match find_ipa_for(be_noun_table.page_id, &Language::Belarusian, &wiki_macros, &client).await {
+                    Some(ipa_string) => ipa_string,
+                    None => {
+                        println!("No ipa at all! {}", &be_noun_table.macro_text);
+                        continue
                     }
                 };
 
@@ -759,6 +784,7 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
                     .expect("writing of bytes");
             }
             println!("Nouns complete!");
+            writer.flush().expect("flush!");
 
             // Belarusian
             // Adjectives
@@ -786,6 +812,7 @@ pub async fn json_to_entry_csv(json_file: &str, out: &str, language: Language) -
             for be_adj_table in be_adj_tables {
                 i += 1;
                 if i % 50 == 0 {
+                    writer.flush().expect("flush");
                     println!("Processing: {}", &be_adj_table.macro_text)
                 }
                 let ipa_string = wiki_macros
